@@ -726,13 +726,13 @@ static void grad_angle_orientation(image_double in, double threshold, image_doub
   /* get memory for the image of gradient modulus */
   modgrad = new_image_double(in->xsize, in->ysize);
 
-  /* 'undefined' on the down and right boundaries */
-  for (x = 0; x < p; x++) g->data[(n - 1) * p + x] = NOTDEF;
-  for (y = 0; y < n; y++) g->data[p * y + p - 1] = NOTDEF;
+  /* 'undefined' on the up and left boundaries */
+  for (x = 0; x < p; x++) g->data[x] = NOTDEF;
+  for (y = 0; y < n; y++) g->data[p * y] = NOTDEF;
 
   /* compute gradient on the remaining pixels */
-  for (x = 0; x < p - 1; x++)
-    for (y = 0; y < n - 1; y++) {
+  for (x = 1; x < p; x++)
+    for (y = 1; y < n; y++) {
       adr = y * p + x;
 
       /*
@@ -746,8 +746,8 @@ static void grad_angle_orientation(image_double in, double threshold, image_doub
            gy = C+D - (A+B)   vertical difference
          com1 and com2 are just to avoid 2 additions.
        */
-      com1 = in->data[adr + p + 1] - in->data[adr];
-      com2 = in->data[adr + 1] - in->data[adr + p];
+      com1 = in->data[adr] - in->data[adr - p - 1];
+      com2 = in->data[adr - p] - in->data[adr - 1];
 
       gx = com1 + com2; /* gradient x component */
       gy = com1 - com2; /* gradient y component */
@@ -2070,9 +2070,9 @@ double *LineSegmentDetection(int *n_out,
          by R. Grompone von Gioi, J. Jakubowicz, J.M. Morel, and G. Randall.
          The original algorithm is obtained with density_th = 0.0.
        */
-      if (!refine(reg, &reg_size, modgrad, reg_angle,
-                  prec, p, &rec, used, angles, density_th))
-        continue;
+      // if (!refine(reg, &reg_size, modgrad, reg_angle,
+      //             prec, p, &rec, used, angles, density_th))
+      //   continue;
 
       /* compute NFA value */
       log_nfa = rect_improve(&rec, angles, logNT, log_eps);
@@ -2086,10 +2086,10 @@ double *LineSegmentDetection(int *n_out,
          points with an offset of (0.5,0.5), that should be added to output.
          The coordinates origin is at the center of pixel (0,0).
        */
-      rec.x1 += 0.5;
-      rec.y1 += 0.5;
-      rec.x2 += 0.5;
-      rec.y2 += 0.5;
+      // rec.x1 += 0.5;
+      // rec.y1 += 0.5;
+      // rec.x2 += 0.5;
+      // rec.y2 += 0.5;
 
       /* scale the result values if a subsampling was performed */
       if (scale != 1.0) {
