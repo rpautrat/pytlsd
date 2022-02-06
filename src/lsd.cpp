@@ -760,7 +760,8 @@ static void grad_angle_orientation(image_double in, double threshold, image_doub
         g->data[adr] = NOTDEF; /* gradient angle not defined */
       else {
         /* gradient angle computation */
-        g->data[adr] = atan2(gx, -gy);
+        //g->data[adr] = atan2(gx, -gy);
+        g->data[adr] = atan2(-gx, gy);
       }
     }
 }
@@ -1967,6 +1968,8 @@ double *LineSegmentDetection(int *n_out,
   ntuple_list out = new_ntuple_list(7);
   double *return_value;
   image_double scaled_image;
+  image_double img_gradnorm = nullptr;
+  image_double img_grad_angle = nullptr;
   image_char used;
   image_int region = nullptr;
   struct coorlist *list_p;
@@ -2008,6 +2011,7 @@ double *LineSegmentDetection(int *n_out,
 
   /* load and scale image (if necessary) and compute angle at each pixel */
   image = new_image_double_ptr((unsigned int) X, (unsigned int) Y, img);
+  ll_angle(gaussian_sampler(image, 1., sigma_scale), rho, &list_p, &mem_p, img_gradnorm, img_grad_angle, (unsigned int) n_bins);
   if (scale != 1.0) {
     scaled_image = gaussian_sampler(image, scale, sigma_scale);
     ll_angle(scaled_image, rho, &list_p, &mem_p, modgrad, angles, (unsigned int) n_bins);
@@ -2075,7 +2079,8 @@ double *LineSegmentDetection(int *n_out,
       //   continue;
 
       /* compute NFA value */
-      log_nfa = rect_improve(&rec, angles, logNT, log_eps);
+      // log_nfa = rect_improve(&rec, angles, logNT, log_eps);
+      log_nfa = rect_improve(&rec, img_grad_angle, logNT, log_eps);
       if (log_nfa <= log_eps) continue;
 
       /* A New Line Segment was found! */
@@ -2117,6 +2122,8 @@ double *LineSegmentDetection(int *n_out,
                                and should not be destroyed.                 */
   angles_ptr ? free(angles) : free_image_double(angles);
   modgrad_ptr ? free(modgrad) : free_image_double(modgrad);
+  free_image_double(img_gradnorm);
+  free_image_double(img_grad_angle);
 
   free_image_char(used);
   free((void *) reg);
