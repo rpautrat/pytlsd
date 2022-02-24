@@ -2175,7 +2175,7 @@ double *lsd_scale_region(int *n_out,
                                modulus.                                       */
 
   return LineSegmentDetection(n_out, img, X, Y, scale, sigma_scale, quant,
-                              ang_th, log_eps, density_th, n_bins,
+                              ang_th, log_eps, density_th, n_bins, true,
                               nullptr, nullptr, reg_img, reg_x, reg_y);
 }
 
