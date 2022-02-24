@@ -1961,7 +1961,7 @@ double *LineSegmentDetection(int *n_out,
                              double *img, int X, int Y,
                              double scale, double sigma_scale, double quant,
                              double ang_th, double log_eps, double density_th,
-                             int n_bins,
+                             int n_bins, bool grad_nfa,
                              double * modgrad_ptr, double * angles_ptr,
                              int **reg_img, int *reg_x, int *reg_y) {
   image_double image;
@@ -2079,8 +2079,10 @@ double *LineSegmentDetection(int *n_out,
       //   continue;
 
       /* compute NFA value */
-      // log_nfa = rect_improve(&rec, angles, logNT, log_eps);
-      log_nfa = rect_improve(&rec, img_grad_angle, logNT, log_eps);
+      if(grad_nfa)
+        log_nfa = rect_improve(&rec, img_grad_angle, logNT, log_eps);
+      else
+        log_nfa = rect_improve(&rec, angles, logNT, log_eps);
       if (log_nfa <= log_eps) continue;
 
       /* A New Line Segment was found! */

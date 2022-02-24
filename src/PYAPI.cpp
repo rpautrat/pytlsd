@@ -42,7 +42,8 @@ py::array_t<float> run_lsd(const py::array& img,
                            double sigma_scale=0.6,
                            double density_th=0.0, /* Minimal density of region points in rectangle. */
                            const py::array& gradnorm = py::array(),
-                           const py::array& gradangle = py::array()) {
+                           const py::array& gradangle = py::array(),
+                           bool grad_nfa = true) {
   double quant = 2.0;       /* Bound to the quantization error on the
                                 gradient norm.                                */
   double ang_th = 22.5;     /* Gradient angle tolerance in degrees.           */
@@ -87,8 +88,9 @@ py::array_t<float> run_lsd(const py::array& img,
 
   // LSD call. Returns [x1,y1,x2,y2,width,p,-log10(NFA)] for each segment
   int N;
-  double *out = LineSegmentDetection(&N, imagePtr, info.shape[1], info.shape[0], scale, sigma_scale, quant,
-                                     ang_th, log_eps, density_th, n_bins, modgrad_ptr, angles_ptr);
+  double *out = LineSegmentDetection(
+    &N, imagePtr, info.shape[1], info.shape[0], scale, sigma_scale, quant,
+    ang_th, log_eps, density_th, n_bins, grad_nfa, modgrad_ptr, angles_ptr);
   // std::cout << "Detected " << N << " LSD Segments" << std::endl;
 
   py::array_t<float> segments({N, 5});
@@ -127,7 +129,8 @@ PYBIND11_MODULE(pytlsd, m) {
           py::arg("sigma_scale") = 0.6,
           py::arg("density_th") = 0.0,
           py::arg("gradnorm") = py::array(),
-          py::arg("gradangle") = py::array());
+          py::arg("gradangle") = py::array(),
+          py::arg("grad_nfa") = true);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
