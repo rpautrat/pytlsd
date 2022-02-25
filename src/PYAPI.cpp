@@ -130,7 +130,7 @@ PYBIND11_MODULE(pytlsd, m) {
           py::arg("density_th") = 0.0,
           py::arg("gradnorm") = py::array(),
           py::arg("gradangle") = py::array(),
-          py::arg("grad_nfa") = true);
+          py::arg("grad_nfa") = false);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
