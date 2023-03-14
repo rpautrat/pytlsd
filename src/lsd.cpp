@@ -2010,7 +2010,6 @@ double *LineSegmentDetection(int *n_out,
 
   /* load and scale image (if necessary) and compute angle at each pixel */
   image = new_image_double_ptr((unsigned int) X, (unsigned int) Y, img);
-  grad_nfa = true;
   scaled_image = gaussian_sampler(image, scale, sigma_scale);
   if (scale != 1.0) {
     if (grad_nfa)
