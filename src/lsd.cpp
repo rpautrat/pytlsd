@@ -1968,12 +1968,10 @@ double *LineSegmentDetection(int *n_out,
   ntuple_list out = new_ntuple_list(7);
   double *return_value;
   image_double scaled_image;
-  image_double img_gradnorm = nullptr;
-  image_double img_grad_angle = nullptr;
   image_char used;
   image_int region = nullptr;
-  struct coorlist *list_p;
-  void *mem_p;
+  struct coorlist *list_p, *list_pp;
+  void *mem_p, *mem_pp;
   struct rect rec;
   struct point *reg;
   int reg_size, min_reg_size, i;
@@ -2002,6 +2000,7 @@ double *LineSegmentDetection(int *n_out,
   // std::cout << "LSD Gradient threshold: " << rho << std::endl;
 
   image_double modgrad{}, angles{};
+  image_double img_gradnorm{}, img_grad_angle{};
   if (modgrad_ptr) {
     modgrad = new_image_double_ptr(X, Y, modgrad_ptr);
   }
@@ -2011,15 +2010,19 @@ double *LineSegmentDetection(int *n_out,
 
   /* load and scale image (if necessary) and compute angle at each pixel */
   image = new_image_double_ptr((unsigned int) X, (unsigned int) Y, img);
-  ll_angle(gaussian_sampler(
-    image, 1., sigma_scale), rho, &list_p, &mem_p,
-    img_gradnorm, img_grad_angle, (unsigned int) n_bins);
+  grad_nfa = true;
+  scaled_image = gaussian_sampler(image, scale, sigma_scale);
   if (scale != 1.0) {
-    scaled_image = gaussian_sampler(image, scale, sigma_scale);
+    if (grad_nfa)
+      ll_angle(scaled_image, rho, &list_pp, &mem_pp, img_gradnorm, img_grad_angle, (unsigned int) n_bins);
     ll_angle(scaled_image, rho, &list_p, &mem_p, modgrad, angles, (unsigned int) n_bins);
-    free_image_double(scaled_image);
-  } else
+    
+  } else {
+    if (grad_nfa)
+      ll_angle(image, rho, &list_pp, &mem_pp, img_gradnorm, img_grad_angle, (unsigned int) n_bins);
     ll_angle(image, rho, &list_p, &mem_p, modgrad, angles, (unsigned int) n_bins);
+  }
+  free_image_double(scaled_image);
   xsize = angles->xsize;
   ysize = angles->ysize;
 
@@ -2126,12 +2129,15 @@ double *LineSegmentDetection(int *n_out,
                                and should not be destroyed.                 */
   angles_ptr ? free(angles) : free_image_double(angles);
   modgrad_ptr ? free(modgrad) : free_image_double(modgrad);
-  free_image_double(img_gradnorm);
-  free_image_double(img_grad_angle);
+  if (grad_nfa) {
+    free_image_double(img_gradnorm);
+    free_image_double(img_grad_angle);
+  }
 
   free_image_char(used);
   free((void *) reg);
   free((void *) mem_p);
+  free((void *) mem_pp);
 
   /* return the result */
   if (reg_img != nullptr && reg_x != nullptr && reg_y != nullptr) {
