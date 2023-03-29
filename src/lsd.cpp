@@ -2135,7 +2135,8 @@ double *LineSegmentDetection(int *n_out,
   free_image_char(used);
   free((void *) reg);
   free((void *) mem_p);
-  free((void *) mem_pp);
+  if (grad_nfa)
+    free((void *) mem_pp);
 
   /* return the result */
   if (reg_img != nullptr && reg_x != nullptr && reg_y != nullptr) {
@@ -2181,7 +2182,7 @@ double *lsd_scale_region(int *n_out,
                                modulus.                                       */
 
   return LineSegmentDetection(n_out, img, X, Y, scale, sigma_scale, quant,
-                              ang_th, log_eps, density_th, n_bins, true,
+                              ang_th, log_eps, density_th, n_bins, false,
                               nullptr, nullptr, reg_img, reg_x, reg_y);
 }
 
