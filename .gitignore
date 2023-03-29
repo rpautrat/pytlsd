@@ -3,5 +3,6 @@
 .idea/*
 *.pyc
 cmake-build-*
-pytlsd.egg-info/*
+/venv/*
+*.egg-info/
 *.so

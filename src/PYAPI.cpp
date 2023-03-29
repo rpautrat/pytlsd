@@ -1,9 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <iostream>
-#include <opencv2/opencv.hpp>
 #include "lsd.h"
-
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -37,13 +35,13 @@ void check_img_format(const py::buffer_info& correct_info, const py::buffer_info
 
 // Passing in a generic array
 // Passing in an array of doubles
-py::array_t<float> run_lsd(const py::array& img,
+py::array_t<float> run_lsd(const py::array_t<double>& img,
                            double scale=0.8,
                            double sigma_scale=0.6,
                            double density_th=0.0, /* Minimal density of region points in rectangle. */
-                           const py::array& gradnorm = py::array(),
-                           const py::array& gradangle = py::array(),
-                           bool grad_nfa = true) {
+                           const py::array_t<double>& gradnorm = py::array_t<double>(),
+                           const py::array_t<double>& gradangle = py::array_t<double>(),
+                           bool grad_nfa = false) {
   double quant = 2.0;       /* Bound to the quantization error on the
                                 gradient norm.                                */
   double ang_th = 22.5;     /* Gradient angle tolerance in degrees.           */
@@ -75,16 +73,7 @@ py::array_t<float> run_lsd(const py::array& img,
     throw py::type_error("Error: You should provide a 2 dimensional array.");
   }
 
-  double *imagePtr;
-  cv::Mat tmp;
-  if (info.format == "d") {
-    imagePtr = static_cast<double *>(info.ptr);
-  } else {
-    tmp = cv::Mat(info.shape[0], info.shape[1], CV_8UC1, info.ptr);
-    tmp.convertTo(tmp, CV_64F);
-    imagePtr = tmp.ptr<double>();
-  }
-
+  double *imagePtr = static_cast<double *>(info.ptr);
 
   // LSD call. Returns [x1,y1,x2,y2,width,p,-log10(NFA)] for each segment
   int N;
